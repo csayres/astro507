@@ -12,34 +12,35 @@ import os
 
 width = 100
 height = 100
-radius = 0.5
+radius = 2
 mass = 1
-nParticles = 900
+nParticles = 100
 v = width / 5 # 5 seconds to cross box
 ke = 0.5 * mass * v**2
 box = Box(width, height)
 for ii in range(nParticles):
     box.addRandomParticle(mass, radius, ke)
-steps = 1000 #100000
-box.runSim(steps, saveEvery=1)
+steps = 50000
+box.runSim(steps, saveEvery=50)
 
 def plotOne(step):
     fig = plt.figure(figsize=(6,8))
     ax1 = plt.subplot2grid((4,3), (0,0), rowspan=3, colspan=3)
     ax2 = plt.subplot2grid((4,3), (3,0), colspan=3)
-    for particle in box.timeSteps[step]:
-        if particle[2] < 2:
-            topcolor="blue"
-        else:
+    for ii, particle in enumerate(box.simSteps[step]):
+
+        if ii in box.collisionFlags[step]:
             topcolor="red"
-        pt = Point(particle[0], particle[1]).buffer(radius, cap_style=1)
+        else:
+            topcolor="blue"
+        pt = Point(particle[2], particle[3]).buffer(particle[1], cap_style=1)
         patch = PolygonPatch(pt, fc=topcolor)
         ax1.add_patch(patch)
     ax1.set_ylim([0, height])
     ax1.set_xlim([0, width])
 
     # plot histogram of speeds
-    speeds = [p[3] for p in box.timeSteps[step]]
+    speeds = numpy.linalg.norm(box.simSteps[step][:,4:6], axis=1)
     bins = numpy.linspace(0,3*v,25)
     ax2.hist(speeds, bins=bins)
     ax2.set_xlim([0, 3*v])
@@ -52,9 +53,9 @@ def plotOne(step):
 
 
 p = Pool(cpu_count())
-p.map(plotOne, range(len(box.timeSteps)))
+p.map(plotOne, range(len(box.simSteps)))
 
-fps = 30
+fps = 60
 args = ['ffmpeg', '-r', '%i'%fps, '-f', 'image2', '-i', 'step_%08d.png',
     '-pix_fmt', 'yuv420p', 'moviehw1b.mp4']
 movie = Popen(args)
