@@ -1,4 +1,4 @@
-from particles import Box
+from cParticle import Box
 import numpy
 numpy.random.seed(0)
 from shapely.geometry import Point
@@ -16,21 +16,24 @@ radius = 10
 mass = 1
 v = width / 5 # 5 seconds to cross box
 ke = 0.5 * mass * v**2
-box = Box(width, height)
-box.addRandomParticle(mass, radius, ke)
-box.addRandomParticle(mass*10, radius, ke)
+seed = 0
+box = Box(width, height, seed)
+box.addRandomParticle(mass, radius, v)
+box.addRandomParticle(mass, radius, v)
 steps = 100000
-box.runSim(steps, saveEvery=100)
-
+dt = 0.001 * radius / v
+saveEvery = 100
+box.runSim(steps, dt, saveEvery)
+print("saved", len(box.particleSteps))
 def plotOne(step):
     plt.figure(figsize=(10,10))
     ax = plt.gca()
-    for particle in box.timeSteps[step]:
+    for particle in box.particleSteps[step]:
         if particle[2] < 2:
             topcolor="blue"
         else:
             topcolor="red"
-        pt = Point(particle[0], particle[1]).buffer(radius, cap_style=1)
+        pt = Point(particle[2], particle[3]).buffer(radius, cap_style=1)
         patch = PolygonPatch(pt, fc=topcolor)
         ax.add_patch(patch)
     ax.set_ylim([0, height])
@@ -41,7 +44,7 @@ def plotOne(step):
 # plotOne(1)
 
 p = Pool(cpu_count())
-p.map(plotOne, range(len(box.timeSteps)))
+p.map(plotOne, range(len(box.particleSteps)))
 
 fps = 50
 args = ['ffmpeg', '-r', '%i'%fps, '-f', 'image2', '-i', 'step_%08d.png',
