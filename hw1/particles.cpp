@@ -186,28 +186,73 @@ std::vector<std::array<double, 5>> Box::dumpState(){
     return ensemble;
 }
 
+std::array<double, 4> Box::statistics(){
+    std::array<double, 4> stats;
+    double mean, std, skew, kurtosis;
+    double nParticles = (double)particles.size();
+    mean = 0;
+    std = 0;
+    skew = 0;
+    kurtosis;
+
+    // calculate mean
+    for (auto p : particles){
+        mean += p->speed();
+    }
+    mean /= nParticles;
+
+    // calculate std
+    for (auto p : particles){
+        std += (p->speed()-mean)*(p->speed()-mean);
+    }
+    std = sqrt(std/(nParticles-1));
+
+    // calculate skew and kurtosis;
+    for (auto p : particles){
+        skew += (p->speed()-mean) * (p->speed()-mean) * (p->speed()-mean);
+        kurtosis += (p->speed()-mean) * (p->speed()-mean) * (p->speed()-mean) * (p->speed()-mean);
+    }
+    skew = skew / (nParticles * std * std * std);
+    kurtosis = kurtosis / (nParticles * std * std * std * std);
+
+    stats[0] = mean;
+    stats[1] = std;
+    stats[2] = skew;
+    stats[3] = kurtosis;
+    return stats;
+
+}
+
 void Box::runSim(int steps, double timestep, int saveEvery){
+    double pressure;
+
     dt = timestep;
     int nParticles = particles.size();
 
     for (int step=0; step < steps; step++){
         // begin main sim loop
         // first propatate particles
+        pressure = 0;
         for (auto p : particles){
             p->updatePosition(dt);
             // reflect the particle if it's at the boundary
             if ( (p->x + p->radius >= width) and (p->vx > 0)){
+                pressure += p->mass * 2 * p->vx / height;
                 p->setVelocities(-1*p->vx, p->vy);
             }
             if ( (p->y + p->radius >= height) and (p->vy > 0)){
                 p->setVelocities(p->vx, -1*p->vy);
+                pressure += p->mass * 2 * p->vy / width;
             }
             if ( (p->x - p->radius <= 0) and (p->vx < 0)){
                 p->setVelocities(-1*p->vx, p->vy);
+                pressure += p->mass * 2 * p->vx / height;
             }
             if ( (p->y - p->radius <= 0) and (p->vy < 0)){
                 p->setVelocities(p->vx, -1*p->vy);
+                pressure += p->mass * 2 * p->vy / width;
             }
+            pressureSteps.push_back(pressure);
         }
 
 
@@ -223,6 +268,9 @@ void Box::runSim(int steps, double timestep, int saveEvery){
                 }
             }
         }
+
+        // save statistics at this iteration
+        statSteps.push_back(statistics());
 
         if ((step % saveEvery) == 0){
             double fraction = float(step)/(float)steps;

@@ -32,6 +32,8 @@ public:
     std::vector<std::shared_ptr<Particle>> particles; // list of all particles in the box
     // list of saved states during the simulation
     std::vector<std::vector<std::array<double, 5>>> particleSteps;
+    std::vector<double> pressureSteps; // at each step
+    std::vector<std::array<double, 4>> statSteps; // mean and std at each step
     Box(double width, double height, int seed=0);
     // input box width and height in cm, seed is the random seed
     std::array<double, 2> randomPoint(double radius);
@@ -51,4 +53,6 @@ public:
     std::vector<std::array<double, 5>> dumpState();
     // dump the current state of the particles
     // a 2D array of size nParticles x [mass, radius, x, y, speed]
+    std::array<double, 4> statistics();
+    // return [mean, std] for the current velocity distribution
 };

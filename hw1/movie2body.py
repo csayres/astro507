@@ -19,7 +19,7 @@ ke = 0.5 * mass * v**2
 seed = 0
 box = Box(width, height, seed)
 box.addRandomParticle(mass, radius, v)
-box.addRandomParticle(mass, radius, v)
+box.addRandomParticle(10*mass, radius, v)
 steps = 100000
 dt = 0.001 * radius / v
 saveEvery = 100
@@ -29,10 +29,7 @@ def plotOne(step):
     plt.figure(figsize=(10,10))
     ax = plt.gca()
     for particle in box.particleSteps[step]:
-        if particle[2] < 2:
-            topcolor="blue"
-        else:
-            topcolor="red"
+        topcolor="blue"
         pt = Point(particle[2], particle[3]).buffer(radius, cap_style=1)
         patch = PolygonPatch(pt, fc=topcolor)
         ax.add_patch(patch)

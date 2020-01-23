@@ -45,4 +45,5 @@ dv = numpy.diff(vs)[0]
 pSum = numpy.sum(p) * dv
 plt.plot(vs, p/pSum, '--r')
 plt.xlabel("velocity (cm/s)")
-plt.show()
+plt.savefig("hw1a.png", dpi=250)
+
