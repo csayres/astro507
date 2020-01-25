@@ -33,7 +33,7 @@ public:
     // list of saved states during the simulation
     std::vector<std::vector<std::array<double, 5>>> particleSteps;
     std::vector<double> pressureSteps; // at each step
-    std::vector<std::array<double, 4>> statSteps; // mean and std at each step
+    std::vector<double> collisionSteps; // collisions registered at each step
     Box(double width, double height, int seed=0);
     // input box width and height in cm, seed is the random seed
     std::array<double, 2> randomPoint(double radius);

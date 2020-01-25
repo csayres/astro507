@@ -186,45 +186,8 @@ std::vector<std::array<double, 5>> Box::dumpState(){
     return ensemble;
 }
 
-std::array<double, 4> Box::statistics(){
-    std::array<double, 4> stats;
-    double mean, std, skew, kurtosis;
-    double nParticles = (double)particles.size();
-    mean = 0;
-    std = 0;
-    skew = 0;
-    kurtosis;
-
-    // calculate mean
-    for (auto p : particles){
-        mean += p->speed();
-    }
-    mean /= nParticles;
-
-    // calculate std
-    for (auto p : particles){
-        std += (p->speed()-mean)*(p->speed()-mean);
-    }
-    std = sqrt(std/(nParticles-1));
-
-    // calculate skew and kurtosis;
-    for (auto p : particles){
-        skew += (p->speed()-mean) * (p->speed()-mean) * (p->speed()-mean);
-        kurtosis += (p->speed()-mean) * (p->speed()-mean) * (p->speed()-mean) * (p->speed()-mean);
-    }
-    skew = skew / (nParticles * std * std * std);
-    kurtosis = kurtosis / (nParticles * std * std * std * std);
-
-    stats[0] = mean;
-    stats[1] = std;
-    stats[2] = skew;
-    stats[3] = kurtosis;
-    return stats;
-
-}
-
 void Box::runSim(int steps, double timestep, int saveEvery){
-    double pressure;
+    double pressure, collisions;
 
     dt = timestep;
     int nParticles = particles.size();
@@ -233,6 +196,8 @@ void Box::runSim(int steps, double timestep, int saveEvery){
         // begin main sim loop
         // first propatate particles
         pressure = 0;
+        collisions = 0;
+
         for (auto p : particles){
             p->updatePosition(dt);
             // reflect the particle if it's at the boundary
@@ -252,8 +217,8 @@ void Box::runSim(int steps, double timestep, int saveEvery){
                 p->setVelocities(p->vx, -1*p->vy);
                 pressure += p->mass * 2 * p->vy / width;
             }
-            pressureSteps.push_back(pressure);
         }
+        pressureSteps.push_back(pressure);
 
 
         // next check all pairwise combos of particles
@@ -265,12 +230,12 @@ void Box::runSim(int steps, double timestep, int saveEvery){
                 auto p2 = particles[jj];
                 if (isCollided(p1, p2)){
                     handleCollision(p1, p2);
+                    collisions += 1;
                 }
             }
         }
+        collisionSteps.push_back(collisions);
 
-        // save statistics at this iteration
-        statSteps.push_back(statistics());
 
         if ((step % saveEvery) == 0){
             double fraction = float(step)/(float)steps;

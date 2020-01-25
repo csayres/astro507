@@ -11,11 +11,11 @@ PYBIND11_MODULE(cParticle, m) {
     py::class_<Box, std::shared_ptr<Box>>(m, "Box")
         .def(py::init<double, double, int>())
         .def_readwrite("width", &Box::width)
-        .def_readwrite("height", &Box::width)
-        .def_readwrite("dt", &Box::width)
+        .def_readwrite("height", &Box::height)
+        .def_readwrite("dt", &Box::dt)
         .def_readwrite("particleSteps", &Box::particleSteps)
         .def_readwrite("pressureSteps", &Box::pressureSteps)
-        .def_readwrite("statSteps", &Box::statSteps)
+        .def_readwrite("collisionSteps", &Box::collisionSteps)
         .def("addRandomParticle", &Box::addRandomParticle)
         .def("runSim", &Box::runSim);
 }
