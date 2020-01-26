@@ -15,7 +15,7 @@ PYBIND11_MODULE(cParticle, m) {
         .def_readwrite("dt", &Box::dt)
         .def_readwrite("particleSteps", &Box::particleSteps)
         .def_readwrite("pressureSteps", &Box::pressureSteps)
-        .def_readwrite("collisionSteps", &Box::collisionSteps)
+        // .def_readwrite("collisionSteps", &Box::collisionSteps)
         .def("addRandomParticle", &Box::addRandomParticle)
         .def("runSim", &Box::runSim);
 }

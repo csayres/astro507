@@ -112,7 +112,7 @@ void Box::addRandomParticle(double mass, double radius, double speed){
 
         if (!collided){
             particles.push_back(p);
-            std::cout << "particles " << particles.size() << std::endl;
+            // std::cout << "particles " << particles.size() << std::endl;
             break;
         }
         if (ii==maxIter){
@@ -187,7 +187,7 @@ std::vector<std::array<double, 5>> Box::dumpState(){
 }
 
 void Box::runSim(int steps, double timestep, int saveEvery){
-    double pressure, collisions;
+    double pressure;
 
     dt = timestep;
     int nParticles = particles.size();
@@ -196,26 +196,26 @@ void Box::runSim(int steps, double timestep, int saveEvery){
         // begin main sim loop
         // first propatate particles
         pressure = 0;
-        collisions = 0;
+        // collisions = 0;
 
         for (auto p : particles){
             p->updatePosition(dt);
             // reflect the particle if it's at the boundary
             if ( (p->x + p->radius >= width) and (p->vx > 0)){
-                pressure += p->mass * 2 * p->vx / height;
+                pressure += p->mass * 2 * abs(p->vx) / dt / height;
                 p->setVelocities(-1*p->vx, p->vy);
             }
             if ( (p->y + p->radius >= height) and (p->vy > 0)){
                 p->setVelocities(p->vx, -1*p->vy);
-                pressure += p->mass * 2 * p->vy / width;
+                pressure += p->mass * 2 * abs(p->vy) / dt / width;
             }
             if ( (p->x - p->radius <= 0) and (p->vx < 0)){
                 p->setVelocities(-1*p->vx, p->vy);
-                pressure += p->mass * 2 * p->vx / height;
+                pressure += p->mass * 2 * abs(p->vx) / dt / height;
             }
             if ( (p->y - p->radius <= 0) and (p->vy < 0)){
                 p->setVelocities(p->vx, -1*p->vy);
-                pressure += p->mass * 2 * p->vy / width;
+                pressure += p->mass * 2 * abs(p->vy) / dt / width;
             }
         }
         pressureSteps.push_back(pressure);
@@ -230,16 +230,16 @@ void Box::runSim(int steps, double timestep, int saveEvery){
                 auto p2 = particles[jj];
                 if (isCollided(p1, p2)){
                     handleCollision(p1, p2);
-                    collisions += 1;
+                    // collisions += 1;
                 }
             }
         }
-        collisionSteps.push_back(collisions);
+        // collisionSteps.push_back(collisions);
 
 
         if ((step % saveEvery) == 0){
-            double fraction = float(step)/(float)steps;
-            std::cout << "saving at step " << step << " fraction done " << fraction << std::endl;
+            // double fraction = float(step)/(float)steps;
+            // std::cout << "saving at step " << step << " fraction done " << fraction << std::endl;
             particleSteps.push_back(dumpState());
         }
 
