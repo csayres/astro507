@@ -186,7 +186,7 @@ std::vector<std::array<double, 5>> Box::dumpState(){
     return ensemble;
 }
 
-void Box::runSim(int steps, double timestep, int saveEvery){
+void Box::runSim(int steps, double timestep){
     double pressure;
 
     dt = timestep;
@@ -201,24 +201,25 @@ void Box::runSim(int steps, double timestep, int saveEvery){
         for (auto p : particles){
             p->updatePosition(dt);
             // reflect the particle if it's at the boundary
+            // and update pressure
             if ( (p->x + p->radius >= width) and (p->vx > 0)){
-                pressure += p->mass * 2 * abs(p->vx) / dt / height;
+                pressure += p->mass * 2*abs(p->vx);
                 p->setVelocities(-1*p->vx, p->vy);
             }
             if ( (p->y + p->radius >= height) and (p->vy > 0)){
                 p->setVelocities(p->vx, -1*p->vy);
-                pressure += p->mass * 2 * abs(p->vy) / dt / width;
+                pressure += p->mass * 2*abs(p->vy);
             }
             if ( (p->x - p->radius <= 0) and (p->vx < 0)){
                 p->setVelocities(-1*p->vx, p->vy);
-                pressure += p->mass * 2 * abs(p->vx) / dt / height;
+                pressure += p->mass * 2*abs(p->vx);
             }
             if ( (p->y - p->radius <= 0) and (p->vy < 0)){
                 p->setVelocities(p->vx, -1*p->vy);
-                pressure += p->mass * 2 * abs(p->vy) / dt / width;
+                pressure += p->mass * 2*abs(p->vy);
             }
         }
-        pressureSteps.push_back(pressure);
+        pressureSteps.push_back(pressure/dt/(2*height+2*width));
 
 
         // next check all pairwise combos of particles
@@ -237,11 +238,7 @@ void Box::runSim(int steps, double timestep, int saveEvery){
         // collisionSteps.push_back(collisions);
 
 
-        if ((step % saveEvery) == 0){
-            // double fraction = float(step)/(float)steps;
-            // std::cout << "saving at step " << step << " fraction done " << fraction << std::endl;
-            particleSteps.push_back(dumpState());
-        }
+        particleSteps.push_back(dumpState());
 
     }
 

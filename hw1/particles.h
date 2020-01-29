@@ -46,10 +46,8 @@ public:
     void handleCollision(std::shared_ptr<Particle> p1, std::shared_ptr<Particle> p2);
     // input pInd1, pInd2 are the indices of particles in particles.  Update their
     // velocities for the case of an elasitc collision
-    void runSim(int steps, double dt, int saveEvery);
-    // Begin the simulation, specify the number of steps and time step dt (seconds),
-    // saveEvery specifies the frequency (in steps) at which to save the system
-    // state into the particleSteps array.
+    void runSim(int steps, double dt);
+    // Begin the simulation, specify the number of steps and time step dt (seconds)
     std::vector<std::array<double, 5>> dumpState();
     // dump the current state of the particles
     // a 2D array of size nParticles x [mass, radius, x, y, speed]
