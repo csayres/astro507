@@ -8,7 +8,6 @@ h = 6.62606885e-27 # erg per s
 c = 2.99792458e10 # cm per s
 jy = 10**-23 # erg s^-1 cm^-2 Hz^-1
 T_CMB = 2.725 # K
-
 data = numpy.loadtxt("firas_monopole_spec_v1.txt")
 nu = data[:,0] * c # convert to s^-1
 I = data[:,1] * (10**6*jy) # convert to specific intensity
@@ -62,8 +61,8 @@ for i,T in enumerate(Ts):
             # print("bestChi", chi2)
             bestChi = chi2
         chi2Grid[i,j] = chi2
-
 muSet = numpy.array(muSet)
+
 chi2Grid = chi2Grid - numpy.min(chi2Grid)
 bestFit = numpy.argwhere(chi2Grid==0).flatten()
 # print("best Fit", bestFit)
@@ -153,7 +152,6 @@ print("ratio of classical pressure to degenerate pressure: %.2f"%(pClassical/pre
 # estimate mass/radius
 # R = (8.44*M/pc)**(1/3)
 mu_e = pc/(mp*ne)
-print("mu_e", mu_e)
 F = quad(fermiDirac, 0, numpy.inf, args=(0.5, bestFugacity))[0]
 A = 0.13 / (mu_e*F)**(2/3)
 M = (A**3*pc/8.44)**(1/2)
